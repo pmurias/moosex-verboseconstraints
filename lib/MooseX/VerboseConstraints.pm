@@ -1,8 +1,28 @@
 package MooseX::VerboseConstraints;
 
+our $VERSION = '0.01';
+
 use warnings;
 use strict;
+use Moose;
+use Devel::PartialDump qw(dump);
 
+{
+no warnings 'redefine';
+sub Moose::Meta::TypeConstraint::get_message {
+    my ($self, $value) = @_;
+    if (my $msg = $self->message) {
+        local $_ = $value;
+        return $msg->($value);
+    }
+    else {
+        return "Validation failed for '" . $self->name . "' failed with value ".dump($value);
+    }
+};
+}
+
+1;
+__END__
 =head1 NAME
 
 MooseX::VerboseConstraints - The great new MooseX::VerboseConstraints!
@@ -11,42 +31,11 @@ MooseX::VerboseConstraints - The great new MooseX::VerboseConstraints!
 
 Version 0.01
 
-=cut
-
-our $VERSION = '0.01';
-
-
 =head1 SYNOPSIS
 
-Quick summary of what the module does.
+    perl -MMooseX::VerboseConstraints script.pl
 
-Perhaps a little code snippet.
-
-    use MooseX::VerboseConstraints;
-
-    my $foo = MooseX::VerboseConstraints->new();
-    ...
-
-=head1 EXPORT
-
-A list of functions that can be exported.  You can delete this section
-if you don't export anything, such as for a purely object-oriented module.
-
-=head1 SUBROUTINES/METHODS
-
-=head2 function1
-
-=cut
-
-sub function1 {
-}
-
-=head2 function2
-
-=cut
-
-sub function2 {
-}
+Make the Moose type constraint failures include more information.
 
 =head1 AUTHOR
 
